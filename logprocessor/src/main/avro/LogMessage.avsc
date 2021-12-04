@@ -1,0 +1,10 @@
+{
+  "namespace": "com.github.srthiru",
+  "type": "record",
+  "name": "LogMessage",
+  "fields": [
+    {
+      "name": "message", "type": "string"
+    }
+  ]
+}
