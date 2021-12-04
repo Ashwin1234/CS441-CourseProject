@@ -2,7 +2,7 @@ name := "LogFileGenerator"
 
 version := "0.1"
 
-scalaVersion := "3.0.2"
+scalaVersion := "2.13.3"
 
 val logbackVersion = "1.3.0-alpha10"
 val sfl4sVersion = "2.0.0-alpha5"
@@ -25,4 +25,13 @@ libraryDependencies ++= Seq(
   "com.typesafe" % "config" % typesafeConfigVersion,
   "com.github.mifmif" % "generex" % generexVersion,
   "com.amazonaws" % "aws-java-sdk-ses" % "1.12.122"
+)
+
+val AkkaVersion = "2.6.17"
+val AkkaHttpVersion = "10.1.11"
+libraryDependencies ++= Seq(
+  "com.lightbend.akka" %% "akka-stream-alpakka-s3" % "3.0.4",
+  "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
+  "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
+  "com.typesafe.akka" %% "akka-http-xml" % AkkaHttpVersion
 )
