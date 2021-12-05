@@ -5,8 +5,9 @@ import cloudflow.streamlets.StreamletShape
 import cloudflow.streamlets.avro.AvroInlet
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.streaming.OutputMode
-import logproc.data._
 import org.apache.spark.sql.{Encoder, Encoders}
+
+import logproc.data._
 
 class LogConsoleEgress extends SparkStreamlet {
 

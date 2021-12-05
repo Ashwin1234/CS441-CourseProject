@@ -11,7 +11,7 @@ import cloudflow.streamlets.{DurationConfigParameter, StreamletShape}
 import org.apache.spark.sql.{Dataset, Encoder, Encoders}
 import org.apache.spark.sql.functions.window
 import org.apache.spark.sql.streaming.OutputMode
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+//import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import logproc.data._
 
 import scala.reflect.ClassTag
@@ -22,9 +22,8 @@ class LogAggregator extends SparkStreamlet{
 
   val in = AvroInlet[LogMessage]("message-in")
   val out = AvroOutlet[LogStats]("stats-out")
-//  override def shape(): StreamletShape = StreamletShape(in, out)
-
-  val shape: StreamletShape = StreamletShape(in, out)
+  override def shape(): StreamletShape = StreamletShape(in, out)
+//  val shape: StreamletShape = StreamletShape(in, out)
 
   val GroupByWindow = DurationConfigParameter("group-by-window", "Window duration for the moving average computation", Some("1 minute"))
 
