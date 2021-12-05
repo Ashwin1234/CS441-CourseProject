@@ -53,72 +53,40 @@ class LogFileIngestor extends AkkaStreamlet {
   implicit val entityStreamingSupport = EntityStreamingSupport.json()
   override protected def createLogic(): AkkaStreamletLogic = new RunnableGraphStreamletLogic {
 
-//    val conf   = ConfigFactory.load()
-//    val bucket = conf.getString("s3-bucket")
-//    val key    = conf.getString("s3-key")
-//
-//    val readFile: _ => Source[Option[(Source[ByteString, NotUsed], ObjectMetadata)], NotUsed] = { _ =>
-//      S3.download(bucket, key))
-//    }
-//
-//    val parseFile: Source[Option[(Source[ByteString, NotUsed], ObjectMetadata)], NotUsed] => LogMessage = { source =>
-//      source.runWith(Sink.head).
-//    }
-//
-//    val emitOut = Source.tick(0.second, 200.second, NotUsed).map(_ => readFile).map(parseFile)
-//
-////    val s3File = S3.download(bucket, key)
-////
-////    def flow =
-////      FlowWithCommittableContext[]
-////        .map { message: LogMessage =>
-////          system.log.info(s"Received message: $message")
-////        }
-//
-//    override def runnableGraph(): RunnableGraph[_] =
-//      s3File.to(committableSink(out))
+    def generateMessages(key: String) = {
 
-    // Santy
-    val conf   = ConfigFactory.load()
-    val bucket = conf.getString("s3.bucket")
-    val key    = conf.getString("s3.key")
+      val conf   = ConfigFactory.load()
+      val bucket = conf.getString("s3.bucket")
 
-    import com.amazonaws.regions.Regions
+      import com.amazonaws.regions.Regions
 
-    val clientRegion: Regions = Regions.US_EAST_1
+      val clientRegion: Regions = Regions.US_EAST_1
 
-    val s3Client = AmazonS3ClientBuilder
-      .standard()
-      .withRegion(clientRegion)
-      .withCredentials(new ProfileCredentialsProvider())
-      .build()
+      val s3Client = AmazonS3ClientBuilder
+        .standard()
+        .withRegion(clientRegion)
+        .withCredentials(new ProfileCredentialsProvider())
+        .build()
 
-    val s3_object = s3Client.getObject(new GetObjectRequest(bucket, key))
+      val s3_object = s3Client.getObject(new GetObjectRequest(bucket, key))
 
-    case class JsonLogMessage(timestamp: String, logType: String, message: String)
+      case class JsonLogMessage(timestamp: String, logType: String, message: String)
 
-    def convertToLogMessage(message: String): LogMessage = {
-      val splits  = message.split(' ')
-      val gson    = new Gson
-      val jsonVal = JsonParser(gson.toJson(JsonLogMessage(splits(0), splits(1), splits(splits.length - 1))))
-      jsonVal.convertTo[LogMessage]
+      def convertToLogMessage(message: String): LogMessage = {
+        val splits  = message.split(' ')
+        val gson    = new Gson
+        val jsonVal = JsonParser(gson.toJson(JsonLogMessage(splits(0), splits(1), splits(splits.length - 1))))
+        jsonVal.convertTo[LogMessage]
+      }
+
+      val output   = scala.io.Source.fromInputStream(s3_object.getObjectContent).mkString
+      val messages = output.split("\n").map(message => convertToLogMessage(message))
+      messages
     }
-
-//    def convertToJson(jsonString: String) = {
-//      val json = JsonParser(jsonString)
-//      json.convertTo[LogMessage]
-//    }
-    //
-//    val jsonLog    = JsonLogMessage(output)
-//    val jsonString = gson.toJson(jsonLog)
-
-    val output   = scala.io.Source.fromInputStream(s3_object.getObjectContent).mkString
-    val messages = output.split("\n").map(message => convertToLogMessage(message))
+//    val key = conf.getString("s3.key")
 
     override def runnableGraph(): RunnableGraph[_] =
-      Source.fromIterator(() => messages.iterator).to(plainSink(out))
-
-//    .map(_ => convertToJson(jsonString)).to(plainSink(out))
+      plainSource(in).map(key => generateMessages(key.key)).to(plainSink(out.asInstanceOf[CodecOutlet[java.io.Serializable]]))
 
   }
 
