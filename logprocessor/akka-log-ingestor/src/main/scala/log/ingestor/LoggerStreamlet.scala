@@ -1,4 +1,4 @@
-package com.github.srthiru
+package log.ingestor
 
 import akka.event.Logging
 import cloudflow.akkastream.AkkaStreamlet

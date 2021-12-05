@@ -1,8 +1,7 @@
-package com.github.srthiru
+package log.ingestor
 
 import spray.json._
 
-import java.time.Instant
 import java.util.UUID
 import scala.util.Try
 

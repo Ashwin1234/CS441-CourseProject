@@ -1,13 +1,10 @@
-package com.github.srthiru
+package log.ingestor
 
 import akka.http.scaladsl.common.EntityStreamingSupport
 import cloudflow.akkastream.util.scaladsl.HttpServerLogic
-import cloudflow.akkastream.{ AkkaServerStreamlet, AkkaStreamletLogic }
-import cloudflow.streamlets.{ CodecOutlet, RoundRobinPartitioner, StreamletShape }
+import cloudflow.akkastream.{AkkaServerStreamlet, AkkaStreamletLogic}
 import cloudflow.streamlets.avro.AvroOutlet
-
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import LogKeyJsonSupport._
+import cloudflow.streamlets.{CodecOutlet, RoundRobinPartitioner, StreamletShape}
 
 /*
 An AkkaServerStreamlet that serves as the starting point of the application.
@@ -21,7 +18,6 @@ Outlets   : "key-out" Sends the received S3 key request to the LogFileIngestor a
 Logic     : HTTPServerLogic to pass along the received request to the next outlet
  */
 class LogHttpIngress extends AkkaServerStreamlet {
-
   // Outlet with a round robin partitioner
   val out: CodecOutlet[LogKey] = AvroOutlet[LogKey]("key-out").withPartitioner(RoundRobinPartitioner)
 

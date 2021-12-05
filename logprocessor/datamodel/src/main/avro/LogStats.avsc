@@ -1,0 +1,11 @@
+{
+  "namespace": "log.ingestor",
+  "type": "record",
+  "name": "LogStats",
+  "fields":[
+    {
+      "name": "numLogs", "type": "double"
+    }
+  ]
+}
+

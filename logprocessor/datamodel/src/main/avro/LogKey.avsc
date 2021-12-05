@@ -1,5 +1,5 @@
 {
-  "namespace": "com.github.srthiru",
+  "namespace": "log.ingestor",
   "type": "record",
   "name": "LogKey",
   "fields":[

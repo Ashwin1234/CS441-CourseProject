@@ -1,39 +1,17 @@
-package com.github.srthiru
+package log.ingestor
 
-import akka.NotUsed
 import akka.http.scaladsl.common.EntityStreamingSupport
-import akka.stream.alpakka.s3.ObjectMetadata
-import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.scaladsl.{ JsonFraming, RunnableGraph, Sink, Source }
-import akka.util.ByteString
-import cloudflow.akkastream.javadsl.FlowWithCommittableContext
+import akka.stream.scaladsl.RunnableGraph
 import cloudflow.akkastream.scaladsl.RunnableGraphStreamletLogic
-import cloudflow.akkastream.{ AkkaStreamlet, AkkaStreamletLogic }
-import cloudflow.streamlets.{ CodecOutlet, RoundRobinPartitioner, StreamletShape }
-import cloudflow.streamlets.avro.{ AvroInlet, AvroOutlet }
-import com.typesafe.config.ConfigFactory
-import spray.json.JsonParser
-
-import scala.concurrent.duration.DurationInt
-import akka.NotUsed
-import akka.actor.ActorLogging
-import akka.event.Logging
-import akka.event.slf4j.Logger
-import akka.stream.IOResult
-import akka.stream.alpakka.file.scaladsl.Directory
-import akka.stream.scaladsl._
-import akka.util.ByteString
-import cloudflow.akkastream._
-import cloudflow.akkastream.scaladsl._
-import cloudflow.streamlets._
-import cloudflow.streamlets.avro._
+import cloudflow.akkastream.{AkkaStreamlet, AkkaStreamletLogic}
+import cloudflow.streamlets.avro.{AvroInlet, AvroOutlet}
+import cloudflow.streamlets.{CodecOutlet, RoundRobinPartitioner, StreamletShape}
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.model.GetObjectRequest
 import com.google.gson.Gson
+import com.typesafe.config.ConfigFactory
 import spray.json.JsonParser
-
-import scala.concurrent.Future
 
 /*
 An AkkaStreamlet that reads a file from S3 based on the key received through the inlet.
@@ -45,7 +23,6 @@ Outlets   : "messages-out" Sends out a stream of log messages to the MessageLogg
 Logic     : RunnableGraphStreamletLogic to execute the runnableGraph that reads the file from S3 and streams the messages
  */
 class LogFileIngestor extends AkkaStreamlet {
-
   import LogMessageJsonSupport._
 
   val in  = AvroInlet[LogKey]("key-in")
@@ -86,7 +63,7 @@ class LogFileIngestor extends AkkaStreamlet {
 //        log.info("gsonLogMessage: {}", gsonLogMessage)
         val jsonVal      = JsonParser(gson.toJson(JsonLogMessage(splits(0), splits(1), splits(splits.length - 1))))
         val convertedVal = jsonVal.convertTo[LogMessage]
-        log.info("parsed: {}, converted: {}", jsonVal, convertedVal)
+        log.info("parsed: {}, converted: {}" + "--" + jsonVal + "--" + convertedVal)
         convertedVal
       }
 
