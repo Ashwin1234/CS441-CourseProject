@@ -16,6 +16,9 @@ import spray.json.JsonParser
 
 import scala.concurrent.duration.DurationInt
 import akka.NotUsed
+import akka.actor.ActorLogging
+import akka.event.Logging
+import akka.event.slf4j.Logger
 import akka.stream.IOResult
 import akka.stream.alpakka.file.scaladsl.Directory
 import akka.stream.scaladsl._
@@ -48,9 +51,12 @@ class LogFileIngestor extends AkkaStreamlet {
   val in  = AvroInlet[LogKey]("key-in")
   val out = AvroOutlet[LogMessage]("message-out").withPartitioner(RoundRobinPartitioner)
 
+  case class JsonLogMessage(timestamp: String, logType: String, message: String)
+
   override def shape(): StreamletShape = StreamletShape.withInlets(in).withOutlets(out)
 
   implicit val entityStreamingSupport = EntityStreamingSupport.json()
+
   override protected def createLogic(): AkkaStreamletLogic = new RunnableGraphStreamletLogic {
 
     def generateMessages(key: String) = {
@@ -70,13 +76,18 @@ class LogFileIngestor extends AkkaStreamlet {
 
       val s3_object = s3Client.getObject(new GetObjectRequest(bucket, key))
 
-      case class JsonLogMessage(timestamp: String, logType: String, message: String)
-
       def convertToLogMessage(message: String): LogMessage = {
-        val splits  = message.split(' ')
-        val gson    = new Gson
-        val jsonVal = JsonParser(gson.toJson(JsonLogMessage(splits(0), splits(1), splits(splits.length - 1))))
-        jsonVal.convertTo[LogMessage]
+//        log.info("Received: {}", message)
+        val splits = message.split(' ')
+        val gson   = new Gson
+//        val jsonLogMessage: JsonLogMessage =
+//        log.info("jsonLogMessage: {}", jsonLogMessage)
+//        val gsonLogMessage =
+//        log.info("gsonLogMessage: {}", gsonLogMessage)
+        val jsonVal      = JsonParser(gson.toJson(JsonLogMessage(splits(0), splits(1), splits(splits.length - 1))))
+        val convertedVal = jsonVal.convertTo[LogMessage]
+        log.info("parsed: {}, converted: {}", jsonVal, convertedVal)
+        convertedVal
       }
 
       val output   = scala.io.Source.fromInputStream(s3_object.getObjectContent).mkString
