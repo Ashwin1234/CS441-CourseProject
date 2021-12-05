@@ -2,81 +2,59 @@
 ### The goal of this course project is to gain experience with creating a streaming data pipeline with cloud computing technologies by designing and implementing an actor-model service using [Akka](https://akka.io/) that ingests logfile generated data in real time and delivers it via an event-based service called [Kafka](https://kafka.apache.org/) to [Spark](https://spark.apache.org/) for further processing. This is a group project with each group consisting of one to six students. No student can participate in more than one group.
 ### Grade: 20%
 
-## Preliminaries
-First things first, if you haven't done so, you must create your account at either [BitBucket](https://bitbucket.org/) or [Github](https://github.com/), which are Git repo management systems. Please make sure that you write your name in your README.md in your repo as it is specified on the class roster. Since it is a large class, please use your UIC email address for communications and avoid emails from other accounts like funnybunny2000@gmail.com.
+## Team Members
++ S
++ T
++ A
++ R
 
-Next, if you haven't done so, you will install [IntelliJ](https://www.jetbrains.com/student/) with your academic license, the JDK, the Scala runtime and the IntelliJ Scala plugin and the [Simple Build Toolkit (SBT)](https://www.scala-sbt.org/1.x/docs/index.html) and make sure that you can create, compile, and run Java and Scala programs. Please make sure that you can run [various Java tools from your chosen JDK between versions 8 and 16](https://docs.oracle.com/en/java/javase/index.html).
+## Development Environment
++ Language : Scala v
++ IDE : Intellij IDEA Community Edition 
++ Build Tool : SBT 1.5.2
++ Frameworks Used : CloudFlow,Akka,Spark, Kafka
++ Deployment : AWS EKS, AWS Lambda
 
-In this course project you will use logging and configuration management frameworks. You will comment your code extensively and supply logging statements at different logging levels (e.g., TRACE, INFO, WARN, ERROR) to record information at some salient points in the executions of your programs. All input and configuration variables must be supplied through configuration files -- hardcoding these values in the source code is prohibited and will be punished by taking a large percentage of points from your total grade! You are expected to use [Logback](https://logback.qos.ch/) and [SLFL4J](https://www.slf4j.org/) for logging and [Typesafe Conguration Library](https://github.com/lightbend/config) for managing configuration files. These and other libraries should be imported into your project using your script [build.sbt](https://www.scala-sbt.org). These libraries and frameworks are widely used in the industry, so learning them is the time well spent to improve your resumes. Preferably, you should create your developer account for $30 per month to enjoy the full range of AWS services.
+## Installatins
++ Install and build [cloudflow](https://cloudflow.io/docs/dev/administration/installing-cloudflow.html)
++ Installing [Kafka and Strimzi](https://cloudflow.io/docs/dev/administration/how-to-install-and-use-strimzi.html)
++ Adding [Spark support](https://cloudflow.io/docs/dev/administration/installing-spark-operator.html)
++ Install and setup [docker](https://docs.docker.com/get-docker/)
 
-When creating your project in Scala, you should avoid using **var**s and while/for loops that iterate over collections using [induction variables](https://en.wikipedia.org/wiki/Induction_variable). Instead, you should learn to use collection methods **map**, **flatMap**, **foreach**, **filter** and many others with lambda functions, which make your code linear and easy to understand. Also, avoid mutable variables that expose the internal states of your modules at all cost. Points will be deducted for having unreasonable **var**s and inductive variable loops without explanation why mutation is needed in your code unless it is confined to method scopes - you can always do without it.
-
-## Overview of the Log File Generator
-In this homework, you will create a distributed program for locating requested records in the log files that are generated using this project that you cloned. Once you cd into the cloned project directory you can build using ```sbt clean compile``` then run tests with ```sbt test``` and then run the project with ```sbt run```. Currently, the settings in ```application.conf``` allow you to generate a random log file with 100 entries that will be put in a directory named ***log*** under the root project directory. Alternatively, you can import this project into IntelliJ and run it from within the IDE. 
-
-Each entry in the log dataset describes a fictitios log message, which contains the time of the entry, the logging context name, the message level (i.e., INFO, WARN, DEBUG or ERROR), the name of the logging module and the message itself. The size of the log file can be controlled by setting the maximum number of log messages or the duration of the log generator run in ```application.conf```. Students can experiment with smaller log files when debugging their programs, but they should create large enough log files for this homework assignment. Each log entry is independent from the other one in that it can be processed without synchronizing with processing some other entries. Using configuration parameter TimePeriod you can specify a range of timeout values, e.g., ```[1000, 10000]``` so that each log message will be created with some random delay within one to ten seconds.
-
-Consider the following entries in the dataset. The first entry is generated at time 09:58:55.569 followed by the second entry generated at time 09:58:55.881. The sixth entry is of type ERROR that has a smaller likelihood range in ```application.conf```. Depending on the value of the configuration parameter ```Frequency``` the regular expression specified in configuration parameter ```Pattern``` is used to create instances of this pattern which are inserted into the generated log messages. It is imperative that students read comments in this configuration file and experiment with different configuration parameter settings to see how the content of the generated log file changes.   
+## Deployment
++ Create a docker repo
 ```
-09:58:55.569 [main] INFO  GenerateLogData$ - Log data generator started...
-09:58:55.881 [scala-execution-context-global-17] INFO  GenerateLogData$ - NL8Q%rvl,RBHq@|XR2U&k>"SXwcyB#iv
-09:58:55.928 [scala-execution-context-global-17] WARN  Generation.Parameters$ - =5$YcP!s@h
-09:59:30.849 [scala-execution-context-global-17] INFO  Generation.Parameters$ - V<Z~#Ws"WNJ:[d?+dRpaIFp23"1_oKn;Qd,>
-09:59:30.867 [scala-execution-context-global-17] INFO  Generation.Parameters$ - 3FNgL<)k7+c+8yQ"3m*e#!)HK[['z+-an/Uw?J'|[<w&kbtM
-09:59:30.876 [scala-execution-context-global-17] ERROR  Generation.Parameters$ - +5l}CAK:}q])
-09:59:30.891 [scala-execution-context-global-17] INFO  Generation.Parameters$ - Mv8)!{uuaD3%<m.VO/[pfHLS&eIBmKx~(6
+ThisBuild / cloudflowDockerRegistry := Some("docker.io")
+ThisBuild / cloudflowDockerRepository := Some("<your docker hub username>")
+  ```
+
++ Build and publish the app using 
+```
+sbt buildApp
 ```
 
-Your job is to create an algorithm for notifying stakeholders via email in real time when more than one ERROR or WARN messages appear within a certain length time window. The starting point of the pipeline is the set of instances of the logfile generator that produce log messages in real time. Next in the pipeline you will create actors using Akka that reactively monitor the log files and determine if a sequence of WARN and ERROR type log messages appear within some predefined time window. This information will be passed as events to Kafka that will notify the next actor in the pipeline with the information about the sequence of messages. This actor will extract the messages and pass them via Kafka to your Spark program for some aggregation that you can define as part of your project, e.g., to produce a report or to run some machine learning algorithm to extract some pattern from this data - at this point it is not important what you will do with the data. The results must be emailed to stakeholders automatically and optionally they can be stored in a file or you can use some NoSQL database like Cassandra that you can obtain from a Docker repo. In the nutshell this is the outline of your course project. Doing this project enables students to put their theoretical knowledge about creating pipelined streaming distributed objects in the cloud setting on a firm footing.
++ To deploy the applications to kubernetes cluster 
+```
+$ kubectl cloudflow deploy /path/to/CS441-CourseProject/target/CS441-CourseProject.json --no-registry-credentials
+```
++ After executing these commands you can see the streamlets running in different pods.
 
-As before, this project script is written using a retroscripting technique, in which the project outlines are generally and loosely drawn, and the individual student teams improvise to create the implementation that fits their refined objectives. In doing so, student teams are expected to stay within the basic requirements of the project and they are free to experiments. Asking questions is important, so please ask away at MS Teams!
-
-## Functionality
-A good starting point is to view a [general overview video made by Lightbend Corp. that describes how to build streaming pipelines using Akka and Spark with Cloudflow](https://www.youtube.com/watch?v=MaXCx0fy0xU). Your course project consists of three pipelined parts: first, create a actor system that is integrated with an event delivery system to enable notifications of real-time events, e.g., updates to log file; second, create a delivery mechanism of the obtained events of interest to Spark for data aggregation to create a summary of events; and third to deliver this summary to stakeholders via some basic email notification mechanism. You are free to determine how your pipelined computing nodes work.
-
-You will deploy multiple instance of the log file generation program on EC2 and configure them to run for some period of time producing and storing log messages into log file in some storage. If you need to modify the generator for this purpose please go ahead and fork the repo and make appropriate changes. 
-
-The starting point is to follow a guide on [creating real-time file monitoring services using Java NIO](https://dzone.com/articles/listening-to-fileevents-with-java-nio). Once you follow the steps of the tutorial, you will be able to create a program in Scala that creates events in response to changes in the watched files in your filesystem.
-
-Next, you will learn how to create an [Akka-based actor](https://doc.akka.io/docs/akka/current/index.html?language=scala) program. As my students you have the subscription to the [**premium content** of Lightbend Academy](https://academy.lightbend.com/courses?search_query=FILTER_TYPE_PREMIUM) that I negotiated with the company leadership. Please make sure to use your UIC.EDU email when you [register with Lightbend Academy](https://www.lightbend.com/account/register).
-
-After that you will learn about [Kafka](https://kafka.apache.org/quickstart) and determine how to use it to [create streams of events](https://www.youtube.com/watch?v=MYTFPTtOoLs). Your head will spin when you realize how many technology solutions are there to meet different needs of creating and deploying distributed objects in the cloud settings. Unfortunately, the time is limited and the project submission deadline is only one month away as of November 5, so I suggest you go with the baseline option, plan and distribute the work among all team members and make sure that you coordinate how to seamlessly integrate different nodes into the main project pipeline for delivery.
-
-The penultimate node in the pipeline is your Spark-based aggregation program that obtains the information about log messages and aggregates them to deliver the aggregated information to stakeholders via email. This is a common notification style for information stakeholders in the enterprise environment that some failures happen in the deployed systems. You can use [AWS email service](https://aws.amazon.com/ses/) or some other messaging alternatives. Soon I will give a lecture on Spark so that it would nicely into your pipelined work on this course project.
-
-Next, after creating and testing your programs locally, you will deploy it and run it on the AWS. You will produce a short movie that documents all steps of the deployment and execution of your program with your narration and you will upload this movie to [youtube](http://www.youtube.com) and as before you will submit a link to your movie as part of your submission in the README.md file. To produce a movie, you may use an academic version of [Camtasia](https://www.techsmith.com/video-editor.html) or some other cheap/free screen capture technology from the UIC webstore or an application for a movie capture of your choice. The captured web browser content should show your login name in the upper right corner of the AWS application and you should introduce all team members in the beginning of the movie speaking into the camera.
-
-## Baseline Submission
-Your baseline project submission should include your implementation, a conceptual explanation in the document or in the comments in the source code of how your algorithm and its implementation work to solve the problem, and the documentation that describe the build and runtime process, to be considered for grading. Your project submission should include all your source code as well as non-code artifacts (e.g., configuration files), your project should be buildable using the SBT, and your documentation must specify what input/outputs are.
-
-## Collaboration
-You can post questions and replies, statements, comments, discussion, etc. on Teams using the corresponding channel. For this homework, feel free to share your ideas, mistakes, code fragments, commands from scripts, and some of your technical solutions with the rest of the class, and you can ask and advise others using Teams on where resources and sample programs can be found on the Internet, how to resolve dependencies and configuration issues. When posting question and answers on Teams, please make sure that you selected the appropriate channel, to ensure that all discussion threads can be easily located. Active participants and problem solvers will receive bonuses from the big brother :-) who is watching your exchanges (i.e., your class instructor and your TA). 
-
-## Git logistics
-**This is a team-based project.** If you read this description it means that you located the [Github repo for this homework](https://github.com/0x1DOCD00D/LogFileGenerator). Please remember to grant a read access to your repository to your TA and your instructor and add your team member collaborators. You should grant the write access to your team mates. You and your team member can commit and push your code as many times as you want, resolving merge conflicts and performing rebases as necessary. Your code will not be visible and it should not be visible to other teams except for your teammates for a team project. Announcing a link to your public repo for this project before the submission deadline will result in losing your grade. For grading, only the latest commit timed before the deadline will be considered. **If your first commit will be pushed after the deadline, your grade for the homework will be zero**. For those of you who struggle with the Git, I recommend a book by Ryan Hodson on Ry's Git Tutorial. The other book called Pro Git is written by Scott Chacon and Ben Straub and published by Apress and it is [freely available](https://git-scm.com/book/en/v2/). There are multiple videos on youtube that go into details of the Git organization and use.
-
-Please follow this naming convention to designate your authorship while submitting your work in README.md: "Firstname Lastname" without quotes, where you specify your first and last names **exactly as you are registered with the University system**, so that we can easily recognize your submission. Make sure that you include all team members. For conflict resolution among team members please refer to as the syllabus.
-
-## Discussions and submission
-As it is mentioned above, you can post questions and replies, statements, comments, discussion, etc. on Teams. Remember that you cannot share your code and your solutions privately, but you can ask and advise others using Teams and StackOverflow or some other developer networks where resources and sample programs can be found on the Internet, how to resolve dependencies and configuration issues. Yet, your implementation should be your own and you cannot share it. Alternatively, you cannot copy and paste someone else's implementation and put your name on it. Your submissions will be checked for plagiarism. **Copying code from your classmates or from some sites on the Internet will result in severe academic penalties up to the termination of your enrollment in the University**.
+## Project Structure
++ Logprocessor - Write the logs to s3.
 
 
-## Submission deadline and logistics
-Sunday, December 5, 2021 at 11:59PM CST via email to the instructor and your TA that lists ALL names of the team members and the link to your repository. Your submission repo will include the code for the program, your documentation with instructions and detailed explanations on how to assemble and deploy your program along with the results of your program execution, the link to the video and a document that explains these results based on the characteristics and the configuration parameters of your log generator, and what the limitations of your implementation are. Again, do not forget, please make sure that you will give both your TAs and your instructor the read access to your private repository. Your code should compile and run from the command line using the commands **sbt clean compile test** and **sbt clean compile run**. Also, you project should be IntelliJ friendly, i.e., your graders should be able to import your code into IntelliJ and run from there. Use .gitignore to exlude files that should not be pushed into the repo.
+[Introduction](./INTRODUCTION.md)
+[Implementation](./IMPLEMENTATION.md)
+
+## Running the application
++ Run the cron job to add files to s3. After files have been added to s3 you should see the following output
+
+## Tests
 
 
-## Evaluation criteria
-- the maximum grade for this course project is 20%. Points are subtracted from this maximum grade: for example, saying that 2% is lost if some requirement is not completed means that the resulting grade will be 20%-2% => 18%; if the core project functionality does not work or it is not implemented as specified in your documentation, your grade will be zero;
-- only some basic Akka or Kafka or Spark examples from some repos are given and nothing else is done: zero grade;
-- having less than five unit and/or integration scalatests: up to 10% lost;
-- missing comments and explanations from your program: up to 10% lost;
-- logging is not used in your programs: up to 10% lost;
-- hardcoding the input values in the source code instead of using the suggested configuration libraries: up to 5% lost;
-- for each used *var* for heap-based shared variables or mutable collections: 0.5% lost;
-- for each used *while* or *for* or other loops with induction variables to iterate over a collection: 0.5% lost;
-- no instructions in README.md on how to install and run your program: up to 15% lost;
-- the program crashes without completing the core functionality: up to 10% lost;
-- the documentation exists but it is insufficient to understand your program design and models and how you assembled and deployed all components of your solution: up to 5% lost;
-- the minimum grade for this course project cannot be less than zero.
 
-That's it, folks!
+
+
+
+
+
