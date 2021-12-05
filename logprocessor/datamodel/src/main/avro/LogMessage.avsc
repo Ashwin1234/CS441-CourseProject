@@ -1,5 +1,5 @@
 {
-  "namespace": "log.ingestor",
+  "namespace": "logproc.data",
   "type": "record",
   "name": "LogMessage",
   "fields":[

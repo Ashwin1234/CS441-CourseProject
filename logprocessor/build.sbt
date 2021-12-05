@@ -60,7 +60,8 @@ lazy val sparkAggregator = appModule("spark-aggregator")
     Test / fork := true,
     libraryDependencies ++= Seq(
       "ch.qos.logback" %  "logback-classic" % "1.2.3",
-      "org.scalatest"  %% "scalatest"       % "3.0.8"  % "test"
+      "org.scalatest"  %% "scalatest"       % "3.0.8"  % "test",
+      "com.typesafe.akka"      %% "akka-http-spray-json"      % "10.2.4"
     )
   )
   .dependsOn(datamodel)

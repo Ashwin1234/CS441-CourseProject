@@ -1,4 +1,4 @@
-package log.ingestor
+package logproc.ingestor
 
 import akka.http.scaladsl.common.EntityStreamingSupport
 import akka.stream.scaladsl.RunnableGraph
@@ -12,6 +12,8 @@ import com.amazonaws.services.s3.model.GetObjectRequest
 import com.google.gson.Gson
 import com.typesafe.config.ConfigFactory
 import spray.json.JsonParser
+
+import logproc.data._
 
 /*
 An AkkaStreamlet that reads a file from S3 based on the key received through the inlet.

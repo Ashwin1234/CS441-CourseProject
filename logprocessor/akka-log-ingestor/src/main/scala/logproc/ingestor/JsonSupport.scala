@@ -1,9 +1,11 @@
-package log.ingestor
+package logproc.ingestor
 
 import spray.json._
 
 import java.util.UUID
 import scala.util.Try
+
+import logproc.data._
 
 trait UUIDJsonSupport extends DefaultJsonProtocol {
   implicit object UUIDFormat extends JsonFormat[UUID] {
@@ -20,6 +22,6 @@ object LogKeyJsonSupport extends DefaultJsonProtocol with UUIDJsonSupport {
   implicit val logUrlFormat = jsonFormat(LogKey.apply, "appId", "key")
 }
 
-object LogMessageJsonSupport extends DefaultJsonProtocol with UUIDJsonSupport {
-  implicit val logMessageFormat = jsonFormat(LogMessage.apply, "timestamp", "logType", "message")
+object LogMessageJsonSupport extends DefaultJsonProtocol {
+  implicit val logMessageFormat = jsonFormat3(LogMessage.apply)
 }

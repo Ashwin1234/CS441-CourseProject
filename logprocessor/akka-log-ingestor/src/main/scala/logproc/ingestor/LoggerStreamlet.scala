@@ -1,4 +1,4 @@
-package log.ingestor
+package logproc.ingestor
 
 import akka.event.Logging
 import cloudflow.akkastream.AkkaStreamlet
@@ -8,6 +8,8 @@ import cloudflow.streamlets.avro.AvroInlet
 import org.apache.avro.specific.SpecificRecordBase
 
 import scala.reflect.ClassTag
+
+import logproc.data._
 
 abstract class LoggerStreamlet[T <: SpecificRecordBase: ClassTag](template: String,
                                                                   inletName: String,
