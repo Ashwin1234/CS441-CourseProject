@@ -4,13 +4,13 @@
   "name": "LogStats",
   "fields":[
     {
-      "name": "numLogs", "type": "int"
+      "name": "numLogs", "type": "long"
     },
     {
-      "name": "numErrors", "type": "int"
+      "name": "numErrors", "type": "long"
     },
     {
-      "name": "flagErrors", "type": "int"
+      "name": "flagErrors", "type": "long"
     }
   ]
 }

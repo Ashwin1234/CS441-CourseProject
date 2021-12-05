@@ -8,7 +8,7 @@ import cloudflow.akkastream.scaladsl.RunnableGraphStreamletLogic
 
 import logproc.data._
 
-class WholeMessageEgress extends AkkaStreamlet {
+class MessageEgress extends AkkaStreamlet {
   var in = AvroInlet[LogMessage]("in")
 
   override def shape: StreamletShape = StreamletShape.createWithInlets(in)
@@ -20,7 +20,7 @@ class WholeMessageEgress extends AkkaStreamlet {
           .map { message => {
 //            log.info("Received message in egress: {}".format(message.toString))
 //            System.out.println(message.toString)
-            log.info("Received message {}".format(message.message))
+            log.warn("Received message {}".format(message.message))
           }
          }
       ).to(committableSink)

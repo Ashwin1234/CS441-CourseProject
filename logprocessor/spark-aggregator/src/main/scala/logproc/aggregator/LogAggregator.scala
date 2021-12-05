@@ -12,6 +12,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import logproc.data._
 import logproc.ingestor.LogMessageJsonSupport._
 import logproc.ingestor.LogStatsJsonSupport._
+import org.apache.spark.sql.types.TimestampType
 
 import scala.concurrent.duration
 import scala.concurrent.duration.Duration
@@ -27,8 +28,10 @@ class LogAggregator extends SparkStreamlet{
 //  val shape: StreamletShape = StreamletShape(in, out)
 
   val GroupByWindow = Some("5 second")// DurationConfigParameter("group-by-window", "Window duration for the moving average computation", Some("5 second"))
+//  val Watermark = DurationConfigParameter("watermark", "Late events watermark duration: how long to wait for late events", Some("1 minute"))
 
   override protected def createLogic(): SparkStreamletLogic = new SparkStreamletLogic {
+
 
     val groupByWindow = GroupByWindow.value
 
@@ -40,15 +43,18 @@ class LogAggregator extends SparkStreamlet{
     }
 
     val check_list = List("ERROR, WARN")
-    val threshold = 2
+    val threshold = 0
     private def process(inDataset: Dataset[LogMessage]): Dataset[LogStats] = {
+
       val query =
         inDataset
 //          .filter($"logType".isin(check_list))
 //          .log("Reading dataset {}".format(col("message")))
-          .groupBy(window($"timestamp", s"${Duration.create(200, duration.MILLISECONDS)}"))
-          .agg(sum($"1").as("numLogs"), sum(when($"logType".isin(check_list), 1).otherwise(0)).as("numErrors"))
-          .withColumn("flagErrors", when($"numErrors">threshold, lit("1")).otherwise(lit("0")))
+          .withColumn("ts", $"timestamp".cast(TimestampType))
+          .withWatermark("ts", "0 seconds")
+          .groupBy(window($"ts", s"${Duration.create(1, duration.SECONDS)}"))
+          .agg(count($"message").as("numLogs"), sum(when($"logType".isin(check_list: _*), 1).otherwise(0)).as("numErrors"))
+          .withColumn("flagErrors", when($"numErrors">threshold, 1).otherwise(0))
 
       query
         .select($"numLogs", $"numErrors", $"flagErrors")

@@ -13,7 +13,7 @@ import logproc.data._
 
 abstract class LoggerStreamlet[T <: SpecificRecordBase: ClassTag](template: String,
                                                                   inletName: String,
-                                                                  logLevel: Logging.LogLevel = Logging.InfoLevel)
+                                                                  logLevel: Logging.LogLevel = Logging.WarningLevel)
     extends AkkaStreamlet {
   val inlet            = AvroInlet[T](name = inletName)
   override def shape() = StreamletShape.withInlets(inlet)
@@ -21,9 +21,10 @@ abstract class LoggerStreamlet[T <: SpecificRecordBase: ClassTag](template: Stri
   override def createLogic = new RunnableGraphStreamletLogic() {
     def runnableGraph =
       sourceWithCommittableContext(inlet)
-        .map { element =>
+        .map { element => {
           system.log.log(logLevel, template, element)
           element
+        }
         }
         .to(committableSink)
   }
