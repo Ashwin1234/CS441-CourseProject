@@ -15,9 +15,9 @@ import com.amazonaws.services.simpleemail.model.Message
 import com.amazonaws.services.simpleemail.model.SendEmailRequest
 
 
-object EmailTester:
+object EmailSender extends App {
 
-  @main def runMain = {
+  def runMain = {
     val from = "skrish45@uic.edu"
 
     val to = "skrish45@uic.edu"
@@ -34,21 +34,41 @@ object EmailTester:
       .withDestination(new Destination().withToAddresses(to))
       .withMessage(new Message().
         withBody(new Body()
-        .withHtml(new Content().withCharset("UTF-8")
-          .withData(HTMLBODY))
+          .withHtml(new Content().withCharset("UTF-8")
+            .withData(HTMLBODY))
           .withText(new Content()
             .withCharset("UTF-8").withData(TEXTBODY)))
+        withSubject (new Content()
+        .withCharset("UTF-8").withData(SUBJECT)))
+      .withSource(from)
+    //      .withConfigurationSetName(CONFIGSET)
+    client.sendEmail(request)
+  }
+}
+
+
+class EmailSender {
+
+  def send_email() = {
+    val from = "skrish45@uic.edu"
+    val to = "skrish45@uic.edu"
+    val HTMLBODY = "<p>Oops! Your application failed</p>"
+    val SUBJECT = "Application update"
+
+    val client = AmazonSimpleEmailServiceClientBuilder
+      .standard()
+      .withRegion(Regions.US_EAST_1).build()
+    val request = new SendEmailRequest()
+      .withDestination(new Destination().withToAddresses(to))
+      .withMessage(new Message().
+        withBody(new Body()
+          .withHtml(new Content().withCharset("UTF-8")
+            .withData(HTMLBODY)))
         withSubject(new Content()
         .withCharset("UTF-8").withData(SUBJECT)))
       .withSource(from)
-//      .withConfigurationSetName(CONFIGSET)
+
     client.sendEmail(request)
-
-
-
   }
-
-
-class EmailTester {
 
 }
