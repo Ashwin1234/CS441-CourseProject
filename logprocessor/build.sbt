@@ -1,8 +1,8 @@
 import cloudflow.sbt.CloudflowAkkaPlugin
 
 
-val AkkaVersion = "2.6.14"
-val AkkaHttpVersion = "10.1.11"
+val AkkaVersion = "2.6.15"
+val AkkaHttpVersion = "10.2.4"
 
 lazy val logProcessor =  (project in file("."))
   .enablePlugins(CloudflowApplicationPlugin, CloudflowAkkaPlugin)
@@ -14,15 +14,17 @@ lazy val logProcessor =  (project in file("."))
     //end::local-conf[]
 
     libraryDependencies ++= Seq(
-      "com.lightbend.akka"     %% "akka-stream-alpakka-file"  % "1.1.2",
-      "com.typesafe.akka"      %% "akka-http-spray-json"      % "10.1.12",
-      "ch.qos.logback"         %  "logback-classic"           % "1.2.3",
-      "com.typesafe.akka"      %% "akka-http-testkit"         % "10.1.12" % "test",
-      "org.scalatest"          %% "scalatest"                 % "3.0.8"  % "test",
+      "com.lightbend.akka"     %% "akka-stream-alpakka-file"  % "3.0.4",
+      "com.typesafe.akka"      %% "akka-http-spray-json"      % "10.2.4",
+      "ch.qos.logback"         %  "logback-classic"           % "1.2.7",
+      "com.typesafe.akka"      %% "akka-http-testkit"         % "10.2.6" % "test",
+      "org.scalatest"          %% "scalatest"                 % "3.2.9"  % "test",
       "com.lightbend.akka" %% "akka-stream-alpakka-s3" % "3.0.4",
       "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
       "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
-      "com.typesafe.akka" %% "akka-http-xml" % AkkaHttpVersion
+      "com.typesafe.akka" %% "akka-http-xml" % AkkaHttpVersion,
+      "com.amazonaws" % "aws-java-sdk-s3" % "1.12.122",
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.0"
     )
   )
   //end::get-started[]
