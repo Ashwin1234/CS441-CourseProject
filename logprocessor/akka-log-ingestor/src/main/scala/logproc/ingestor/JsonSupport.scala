@@ -25,3 +25,11 @@ object LogKeyJsonSupport extends DefaultJsonProtocol with UUIDJsonSupport {
 object LogMessageJsonSupport extends DefaultJsonProtocol {
   implicit val logMessageFormat = jsonFormat3(LogMessage.apply)
 }
+
+object WholeMessageJsonSupport extends DefaultJsonProtocol {
+  implicit val wholeMessageFormat = jsonFormat1(WholeMessage.apply)
+}
+
+object LogStatsJsonSupport extends DefaultJsonProtocol {
+  implicit val logMessageFormat = jsonFormat3(LogStats.apply)
+}

@@ -1,0 +1,10 @@
+{
+  "namespace": "logproc.data",
+  "type": "record",
+  "name": "WholeMessage",
+  "fields":[
+    {
+      "name": "message", "type": "string"
+    }
+  ]
+}

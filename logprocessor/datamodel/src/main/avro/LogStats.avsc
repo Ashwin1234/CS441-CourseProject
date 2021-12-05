@@ -4,7 +4,13 @@
   "name": "LogStats",
   "fields":[
     {
-      "name": "numLogs", "type": "double"
+      "name": "numLogs", "type": "int"
+    },
+    {
+      "name": "numErrors", "type": "int"
+    },
+    {
+      "name": "flagErrors", "type": "int"
     }
   ]
 }

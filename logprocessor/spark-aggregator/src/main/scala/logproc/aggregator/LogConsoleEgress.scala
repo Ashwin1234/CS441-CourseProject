@@ -8,6 +8,7 @@ import org.apache.spark.sql.streaming.OutputMode
 import org.apache.spark.sql.{Encoder, Encoders}
 
 import logproc.data._
+import logproc.ingestor.LogStatsJsonSupport._
 
 class LogConsoleEgress extends SparkStreamlet {
 

@@ -4,10 +4,8 @@ import akka.http.scaladsl.common.EntityStreamingSupport
 import cloudflow.akkastream.util.scaladsl.HttpServerLogic
 import cloudflow.akkastream.{AkkaServerStreamlet, AkkaStreamletLogic}
 import cloudflow.streamlets.avro.AvroOutlet
-import cloudflow.streamlets.{CodecOutlet, RoundRobinPartitioner, StreamletShape}
-
+import cloudflow.streamlets.{CodecOutlet, StreamletShape}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-
 import logproc.data._
 
 /*
@@ -24,13 +22,13 @@ Logic     : HTTPServerLogic to pass along the received request to the next outle
 class LogHttpIngress extends AkkaServerStreamlet {
   import LogKeyJsonSupport._
   // Outlet with a round robin partitioner
-  val out: CodecOutlet[LogKey] = AvroOutlet[LogKey]("key-out").withPartitioner(RoundRobinPartitioner)
+  val out = AvroOutlet[LogKey]("key-out")
 
   // Defining the streamlet shape
   override def shape(): StreamletShape = StreamletShape.withOutlets(out)
 
   // Streaming support for Json processing of the received requests
-  implicit val entityStreamingSupport = EntityStreamingSupport.json()
+//  implicit val entityStreamingSupport = EntityStreamingSupport.json()
 
   // Logic of the streamlet
   override protected def createLogic(): AkkaStreamletLogic = HttpServerLogic.default(this, out)
