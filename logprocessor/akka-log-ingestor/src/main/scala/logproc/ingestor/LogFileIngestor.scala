@@ -39,13 +39,13 @@ class LogFileIngestor extends AkkaStreamlet {
   import WholeMessageJsonSupport._
 
   val in  = AvroInlet[LogKey]("key-in")
-  val left = AvroOutlet[LogMessage]("message-valid")
+//  val left = AvroOutlet[LogMessage]("message-valid")
 //  val right: AvroOutlet[InvalidLog] = AvroOutlet[InvalidLog]("message-invalid")
-//  val middle = AvroOutlet[WholeMessage]("message-whole")
+  val middle = AvroOutlet[WholeMessage]("message-valid")
 
   case class JsonLogMessage(timestamp: Long, logType: String, message: String)
   case class JsonWholeMessage(message: String)
-  override def shape(): StreamletShape = StreamletShape.withInlets(in).withOutlets(left) //, right
+  override def shape(): StreamletShape = StreamletShape.withInlets(in).withOutlets(middle) //, right
 //  implicit val entityStreamingSupport = EntityStreamingSupport.json()
 
   def readMessages(key: String) = {
@@ -92,29 +92,29 @@ class LogFileIngestor extends AkkaStreamlet {
     messages
   }
 
-//  def readLog(key: String): WholeMessage = {
-//    val conf   = ConfigFactory.load()
-//    val bucket = conf.getString("s3.bucket")
-//
-//    import com.amazonaws.regions.Regions
-//
-//    val clientRegion: Regions = Regions.US_EAST_1
-//
-//    val s3Client = AmazonS3ClientBuilder
-//      .standard()
-//      .withRegion(clientRegion)
-//      .withCredentials(new ProfileCredentialsProvider())
-//      .build()
-//
-//    val s3_object = s3Client.getObject(new GetObjectRequest(bucket, key))
-//    val output = scala.io.Source.fromInputStream(s3_object.getObjectContent).mkString
-//    val gson   = new Gson
-//    val jsonVal      = JsonParser(gson.toJson(JsonWholeMessage(output)))
-//    log.warn("Parsed Whole message: {}".format(jsonVal))
-//    val convertedVal = jsonVal.convertTo[WholeMessage]
-//    log.warn("Converted Whole message: {}".format(convertedVal))
-//    convertedVal
-//  }
+  def readLog(key: String): WholeMessage = {
+    val conf   = ConfigFactory.load()
+    val bucket = conf.getString("s3.bucket")
+
+    import com.amazonaws.regions.Regions
+
+    val clientRegion: Regions = Regions.US_EAST_1
+
+    val s3Client = AmazonS3ClientBuilder
+      .standard()
+      .withRegion(clientRegion)
+      .withCredentials(new ProfileCredentialsProvider())
+      .build()
+
+    val s3_object = s3Client.getObject(new GetObjectRequest(bucket, key))
+    val output = scala.io.Source.fromInputStream(s3_object.getObjectContent).mkString
+    val gson   = new Gson
+    val jsonVal      = JsonParser(gson.toJson(JsonWholeMessage(output)))
+    log.warn("Parsed Whole message: {}" + jsonVal)
+    val convertedVal = jsonVal.convertTo[WholeMessage]
+    log.warn("Converted Whole message: {}"+ convertedVal)
+    convertedVal
+  }
 
   override protected def createLogic(): AkkaStreamletLogic = new RunnableGraphStreamletLogic {
     //    val key = conf.getString("s3.key")
@@ -128,18 +128,17 @@ class LogFileIngestor extends AkkaStreamlet {
 
     override def runnableGraph() = {
 
-      sourceWithCommittableContext(in).map(key => readMessages(key.key)).map(message =>
-        message.map(eachMessage => {
-          log.warn("Single message: {}" + eachMessage.message)
-          Source.single(eachMessage).to(plainSink(left))
-        })
-//
-      ).to(committableSink)
-    } //.asInstanceOf[CodecOutlet[java.io.Serializable]]
+//      sourceWithCommittableContext(in).map(key => readMessages(key.key)).map(message =>
+//        message.map(eachMessage => {
+//          log.warn("Single message: {}" + eachMessage.message)
+//          Source.single(eachMessage).to(plainSink(left))
+//        })
+//      ).to(committableSink)
 
+      //.asInstanceOf[CodecOutlet[java.io.Serializable]]
 
-
-//    sourceWithCommittableContext(in).map(key => readLog(key.key)).to(committableSink(middle)) //.asInstanceOf[CodecOutlet[java.io.Serializable]]
+      sourceWithCommittableContext(in).map(key => readLog(key.key)).to(committableSink(middle)) //.asInstanceOf[CodecOutlet[java.io.Serializable]]
+    }
 
   }
 
