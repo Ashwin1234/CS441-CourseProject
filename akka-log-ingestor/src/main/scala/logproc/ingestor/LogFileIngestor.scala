@@ -50,13 +50,12 @@ class LogFileIngestor extends AkkaStreamlet {
 
   def readMessages(key: String) = {
 
-    val conf   = ConfigFactory.load()
+    val conf   = ConfigFactory.load("application.conf")
     val bucket = conf.getString("s3.bucket")
 
     import com.amazonaws.regions.Regions
 
-    //val clientRegion: Regions = Regions.US_EAST_1
-    val clientRegion: Regions = conf.getString("s3.region")
+    val clientRegion: Regions = Regions.US_EAST_1
 
     val s3Client = AmazonS3ClientBuilder
       .standard()

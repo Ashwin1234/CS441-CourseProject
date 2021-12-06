@@ -14,18 +14,20 @@ import com.amazonaws.services.simpleemail.model.Content
 import com.amazonaws.services.simpleemail.model.Destination
 import com.amazonaws.services.simpleemail.model.Message
 import com.amazonaws.services.simpleemail.model.SendEmailRequest
+import com.typesafe.config.ConfigFactory
 import logproc.data._
 
 class EmailProc extends AkkaStreamlet{
 
-  val in = AvroInlet[LogStats]("stats-in")
+  val conf   = ConfigFactory.load("application.conf")
+  val in = AvroInlet[LogStats](conf.getString("email.inlet-name"))
 
   def sendEmail(stat: LogStats) = {
     if(stat.flagErrors == 1){
-      val from = "skrish45@uic.edu"
-      val to = "skrish45@uic.edu"
-      val HTMLBODY = "<p>Oops! Your application failed</p>"
-      val SUBJECT = "Application update"
+      val from = conf.getString("email.emailId")
+      val to = conf.getString("email.emailId")
+      val HTMLBODY = conf.getString("email.body")
+      val SUBJECT = conf.getString("email.subject")
 
       val client = AmazonSimpleEmailServiceClientBuilder
         .standard()
@@ -34,10 +36,10 @@ class EmailProc extends AkkaStreamlet{
         .withDestination(new Destination().withToAddresses(to))
         .withMessage(new Message().
           withBody(new Body()
-            .withHtml(new Content().withCharset("UTF-8")
+            .withHtml(new Content().withCharset(conf.getString("email.charset"))
               .withData(HTMLBODY)))
           withSubject(new Content()
-          .withCharset("UTF-8").withData(SUBJECT)))
+          .withCharset(conf.getString("email.charset")).withData(SUBJECT)))
         .withSource(from)
 
       client.sendEmail(request)

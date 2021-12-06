@@ -9,6 +9,7 @@ import logproc.data._
 
 trait UUIDJsonSupport extends DefaultJsonProtocol {
   implicit object UUIDFormat extends JsonFormat[UUID] {
+    val conf =
     def write(uuid: UUID) = JsString(uuid.toString)
 
     def read(json: JsValue): UUID = json match {

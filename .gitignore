@@ -1,7 +1,8 @@
 
 # sbt
 bin/
-project/
+project/target
+project/project
 target/
 build/
 out/
@@ -23,8 +24,6 @@ dist/*
 lib_managed/
 src_managed/
 project/boot/
-project/plugins/project/
-project/local-plugins.sbt
 .history
 .bsp
 
