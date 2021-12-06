@@ -1,8 +1,7 @@
 import com.typesafe.config.{Config, ConfigFactory}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
-//import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
-import org.scalatest.matchers.should.Matchers.shouldBe
+import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 
 // Test cases
@@ -27,8 +26,5 @@ class Test extends AnyFlatSpec with Matchers {
   it should "window" in {
     config.getString("spark.window") shouldBe "5 second"
   }
-
-
-
 
 }
