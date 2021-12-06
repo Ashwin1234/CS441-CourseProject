@@ -8,6 +8,7 @@ import scala.util.Try
 import logproc.data._
 // JsonSupport for different AVROs used
 trait UUIDJsonSupport extends DefaultJsonProtocol {
+  val conf = ConfigFactory.load()
   implicit object UUIDFormat extends JsonFormat[UUID] {
     def write(uuid: UUID) = JsString(uuid.toString)
 

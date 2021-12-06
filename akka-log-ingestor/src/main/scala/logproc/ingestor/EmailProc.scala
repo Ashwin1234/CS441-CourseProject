@@ -49,7 +49,7 @@ class EmailProc extends AkkaStreamlet{
         .withSource(from)
       //Sending request
       client.sendEmail(request)
-      stat
+      "email sent successfully"
     }
   }
 
