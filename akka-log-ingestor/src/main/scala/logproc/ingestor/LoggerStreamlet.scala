@@ -11,6 +11,8 @@ import scala.reflect.ClassTag
 
 import logproc.data._
 
+
+//Sub class for all streamlets that log messages
 abstract class LoggerStreamlet[T <: SpecificRecordBase: ClassTag](template: String,
                                                                   inletName: String,
                                                                   logLevel: Logging.LogLevel = Logging.WarningLevel)

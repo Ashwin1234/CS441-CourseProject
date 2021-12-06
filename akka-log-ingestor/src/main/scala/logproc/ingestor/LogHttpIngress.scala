@@ -28,7 +28,6 @@ class LogHttpIngress extends AkkaServerStreamlet {
   override def shape(): StreamletShape = StreamletShape.withOutlets(out)
 
   // Streaming support for Json processing of the received requests
-//  implicit val entityStreamingSupport = EntityStreamingSupport.json()
 
   // Logic of the streamlet
   override protected def createLogic(): AkkaStreamletLogic = HttpServerLogic.default(this, out)
