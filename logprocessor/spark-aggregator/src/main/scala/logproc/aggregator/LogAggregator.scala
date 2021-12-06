@@ -22,7 +22,7 @@ case class Log(timestamp: String, errorType: String, message: String)
 
 class LogAggregator extends SparkStreamlet{
 
-  val in = AvroInlet[LogMessage]("message-in")
+  val in = AvroInlet[WholeMessage]("message-in")
   val out = AvroOutlet[LogStats]("stats-out")
   override def shape(): StreamletShape = StreamletShape(in, out)
 //  val shape: StreamletShape = StreamletShape(in, out)
@@ -46,19 +46,32 @@ class LogAggregator extends SparkStreamlet{
 
     val check_list = List("ERROR, WARN")
     val threshold = 0
-    private def process(inDataset: Dataset[LogMessage]): Dataset[LogStats] = {
+    private def process(inDataset: Dataset[WholeMessage]): Dataset[LogStats] = {
 
       val query =
         inDataset
-//          .filter($"logType".isin(check_list))
-//          .log("Reading dataset {}".format(col("message")))
-          .withColumn("ts", $"timestamp".cast(TimestampType))
-          .withWatermark("ts", "0 seconds")
-          .groupBy(window($"ts", s"${Duration.create(1, duration.SECONDS)}"))
-          .agg(count($"message").as("numLogs"), sum(when($"logType".isin(check_list: _*), 1).otherwise(0)).as("numErrors"))
+          .withColumn("message", explode(split($"message", "[\n]")))
+          .where(not($"message".like("[run-main-0]")))
+          .withColumn("_tmp", split($"message", " "))
+          .withColumn("timestamp", unix_timestamp($"_tmp".getItem(0), "HH:mm:ss.SSS").cast(TimestampType))
+          .withColumn("logType", $"_tmp".getItem(2))
+          .withColumn("message", $"_tmp".getItem(5))
+          .withWatermark("timestamp", "0 seconds")
+          .groupBy(window($"timestamp", s"${Duration.create(30, duration.SECONDS)}"))
+          .agg(count($"message").as("numLogs"), sum(when($"logType" === "WARN" || "$logType" == "ERROR", 1).otherwise(0)).as("numErrors"))
           .withColumn("flagErrors", when($"numErrors">threshold, 1).otherwise(0))
 
+
+//          .filter($"logType".isin(check_list))
+//          .log("Reading dataset {}".format(col("message")))
+//          .withColumn("ts", $"timestamp".cast(TimestampType))
+//          .withWatermark("ts", "0 seconds")
+//          .groupBy(window($"ts", s"${Duration.create(1, duration.SECONDS)}"))
+//          .agg(count($"message").as("numLogs"), sum(when($"logType".isin(check_list: _*), 1).otherwise(0)).as("numErrors"))
+
       query
+//        .select($"timestamp", $"logType", $"message")
+//        .as[LogMessage]
         .select($"numLogs", $"numErrors", $"flagErrors")
         .as[LogStats]
     }

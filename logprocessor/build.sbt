@@ -48,6 +48,7 @@ lazy val akkaLogIngestor= appModule("akka-log-ingestor")
       "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
       "com.typesafe.akka" %% "akka-http-xml" % AkkaHttpVersion,
       "com.amazonaws" % "aws-java-sdk-s3" % "1.12.122",
+      "com.amazonaws" % "aws-java-sdk-ses" % "1.12.122",
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.0"
     )
   )
@@ -61,9 +62,7 @@ lazy val sparkAggregator = appModule("spark-aggregator")
     libraryDependencies ++= Seq(
       "ch.qos.logback" %  "logback-classic" % "1.2.3",
       "org.scalatest"  %% "scalatest"       % "3.0.8"  % "test",
-      "com.typesafe.akka"      %% "akka-http-spray-json"      % "10.2.4",
-      "org.apache.logging.log4j" % "log4j-api" % "2.14.1",
-      "org.apache.logging.log4j" % "log4j-core" % "2.14.1"
+      "com.typesafe.akka"      %% "akka-http-spray-json"      % "10.2.4"
     )
   )
   .dependsOn(datamodel)
