@@ -68,7 +68,7 @@ If using AWS ECR, provide those credentials instead.
 + spark-aggregator - Contains the spark aggregation program to perform some data aggregation tasks.
 + EmailProc.scala - Contains the code to dispatch email using AWS SES.
 
-Complete flow along with loggers can be seen here [include](File:flow.md)
+Complete flow along with loggers can be see[n here](flow.md)
 
 ### About Cloudflow Applications
 
