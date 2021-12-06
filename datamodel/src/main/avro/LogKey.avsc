@@ -1,0 +1,18 @@
+{
+  "namespace": "logproc.data",
+  "type": "record",
+  "name": "LogKey",
+  "fields":[
+    {
+      "name": "appId",
+      "type": {
+        "type": "string",
+        "logicalType": "uuid"
+      }
+    },
+    {
+      "name": "key", "type": "string"
+    }
+  ]
+}
+

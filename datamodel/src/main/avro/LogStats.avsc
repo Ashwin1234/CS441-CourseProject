@@ -1,0 +1,17 @@
+{
+  "namespace": "logproc.data",
+  "type": "record",
+  "name": "LogStats",
+  "fields":[
+    {
+      "name": "numLogs", "type": "long"
+    },
+    {
+      "name": "numErrors", "type": "long"
+    },
+    {
+      "name": "flagErrors", "type": "long"
+    }
+  ]
+}
+

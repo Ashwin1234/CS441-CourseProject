@@ -1,0 +1,14 @@
+{
+  "namespace": "logproc.data",
+  "type": "record",
+  "name": "InvalidLog",
+  "fields":[
+    {
+      "name": "message", "type": "string"
+    },
+    {
+      "name": "error", "type": "string"
+    }
+  ]
+}
+
