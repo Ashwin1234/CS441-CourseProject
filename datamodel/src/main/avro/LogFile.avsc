@@ -1,0 +1,13 @@
+{
+  "namespace": "logproc.data",
+  "type": "record",
+  "name": "LogFile",
+  "fields":[
+    {
+      "name": "app", "type": "string"
+    },
+    {
+      "name": "content", "type": "string"
+    }
+  ]
+}

@@ -12,7 +12,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import logproc.data._
 import logproc.ingestor.LogMessageJsonSupport._
 import logproc.ingestor.LogStatsJsonSupport._
-import org.apache.spark.sql.types.TimestampType
+import org.apache.spark.sql.types.{LongType, TimestampType}
 
 import scala.concurrent.duration
 import scala.concurrent.duration.Duration
@@ -22,7 +22,7 @@ case class Log(timestamp: String, errorType: String, message: String)
 
 class LogAggregator extends SparkStreamlet{
 
-  val in = AvroInlet[WholeMessage]("message-in")
+  val in = AvroInlet[LogFile]("message-in")
   val out = AvroOutlet[LogStats]("stats-out")
   override def shape(): StreamletShape = StreamletShape(in, out)
 //  val shape: StreamletShape = StreamletShape(in, out)
@@ -30,7 +30,7 @@ class LogAggregator extends SparkStreamlet{
   //val GroupByWindow = Some("5 second")
   val GroupByWindow = Some("spark.window")
   // DurationConfigParameter("group-by-window", "Window duration for the moving average computation", Some("5 second"))
-//  val Watermark = DurationConfigParameter("watermark", "Late events watermark duration: how long to wait for late events", Some("1 minute"))
+  //  val Watermark = DurationConfigParameter("watermark", "Late events watermark duration: how long to wait for late events", Some("1 minute"))
 
   override protected def createLogic(): SparkStreamletLogic = new SparkStreamletLogic {
 
@@ -45,21 +45,25 @@ class LogAggregator extends SparkStreamlet{
     }
 
     val check_list = List("ERROR, WARN")
-    val threshold = 0
-    private def process(inDataset: Dataset[WholeMessage]): Dataset[LogStats] = {
+    val threshold = config.getInt("spark.alertThreshold")
+    val filterText = config.getString("spark.filterText")
+
+    private def process(inDataset: Dataset[LogFile]): Dataset[LogStats] = {
 
       val query =
         inDataset
-          .withColumn("message", explode(split($"message", "[\n]")))
+          .withColumn("message", explode(split($"content", "[\n]")))
           .where(not($"message".like("[run-main-0]")))
           .withColumn("_tmp", split($"message", " "))
           .withColumn("timestamp", unix_timestamp($"_tmp".getItem(0), "HH:mm:ss.SSS").cast(TimestampType))
           .withColumn("logType", $"_tmp".getItem(2))
           .withColumn("message", $"_tmp".getItem(5))
           .withWatermark("timestamp", "0 seconds")
-          .groupBy(window($"timestamp", s"${Duration.create(30, duration.SECONDS)}"))
+          .groupBy($"app", window($"timestamp", s"${Duration.create(30, duration.SECONDS)}"))
           .agg(count($"message").as("numLogs"), sum(when($"logType" === "WARN" || "$logType" == "ERROR", 1).otherwise(0)).as("numErrors"))
           .withColumn("flagErrors", when($"numErrors">threshold, 1).otherwise(0))
+          .withColumn("windowstart", $"window.start".cast(LongType))
+          .withColumn("windowend", $"window.end".cast(LongType))
 
 
 //          .filter($"logType".isin(check_list))
@@ -72,7 +76,7 @@ class LogAggregator extends SparkStreamlet{
       query
 //        .select($"timestamp", $"logType", $"message")
 //        .as[LogMessage]
-        .select($"numLogs", $"numErrors", $"flagErrors")
+        .select($"app", $"windowstart", $"windowend", $"numLogs", $"numErrors", $"flagErrors")
         .as[LogStats]
     }
   }

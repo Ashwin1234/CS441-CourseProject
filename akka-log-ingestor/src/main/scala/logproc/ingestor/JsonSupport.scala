@@ -9,7 +9,6 @@ import logproc.data._
 
 trait UUIDJsonSupport extends DefaultJsonProtocol {
   implicit object UUIDFormat extends JsonFormat[UUID] {
-    val conf =
     def write(uuid: UUID) = JsString(uuid.toString)
 
     def read(json: JsValue): UUID = json match {
@@ -27,10 +26,10 @@ object LogMessageJsonSupport extends DefaultJsonProtocol {
   implicit val logMessageFormat = jsonFormat3(LogMessage.apply)
 }
 
-object WholeMessageJsonSupport extends DefaultJsonProtocol {
-  implicit val wholeMessageFormat = jsonFormat1(WholeMessage.apply)
+object LogFileJsonSupport extends DefaultJsonProtocol {
+  implicit val logFileFormat = jsonFormat2(LogFile.apply)
 }
 
 object LogStatsJsonSupport extends DefaultJsonProtocol {
-  implicit val logMessageFormat = jsonFormat3(LogStats.apply)
+  implicit val logStatFormat = jsonFormat6(LogStats.apply)
 }

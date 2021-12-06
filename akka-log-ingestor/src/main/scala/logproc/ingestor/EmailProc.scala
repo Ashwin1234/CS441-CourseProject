@@ -26,7 +26,7 @@ class EmailProc extends AkkaStreamlet{
     if(stat.flagErrors == 1){
       val from = conf.getString("email.emailId")
       val to = conf.getString("email.emailId")
-      val HTMLBODY = conf.getString("email.body")
+      val HTMLBODY = conf.getString("email.bodyTemplate").format(stat.numErrors, stat.numLogs, stat.app, stat.windowstart, stat.windowend)
       val SUBJECT = conf.getString("email.subject")
 
       val client = AmazonSimpleEmailServiceClientBuilder

@@ -4,6 +4,15 @@
   "name": "LogStats",
   "fields":[
     {
+      "name": "app", "type": "string"
+    },
+    {
+      "name": "windowstart", "type": "long"
+    },
+    {
+      "name": "windowend", "type": "long"
+    },
+    {
       "name": "numLogs", "type": "long"
     },
     {
