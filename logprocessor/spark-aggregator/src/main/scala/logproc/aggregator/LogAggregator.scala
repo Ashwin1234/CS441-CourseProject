@@ -27,7 +27,9 @@ class LogAggregator extends SparkStreamlet{
   override def shape(): StreamletShape = StreamletShape(in, out)
 //  val shape: StreamletShape = StreamletShape(in, out)
 
-  val GroupByWindow = Some("5 second")// DurationConfigParameter("group-by-window", "Window duration for the moving average computation", Some("5 second"))
+  //val GroupByWindow = Some("5 second")
+  val GroupByWindow = Some("spark.window")
+  // DurationConfigParameter("group-by-window", "Window duration for the moving average computation", Some("5 second"))
 //  val Watermark = DurationConfigParameter("watermark", "Late events watermark duration: how long to wait for late events", Some("1 minute"))
 
   override protected def createLogic(): SparkStreamletLogic = new SparkStreamletLogic {

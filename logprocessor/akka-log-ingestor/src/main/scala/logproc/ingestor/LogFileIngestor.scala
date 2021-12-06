@@ -55,7 +55,8 @@ class LogFileIngestor extends AkkaStreamlet {
 
     import com.amazonaws.regions.Regions
 
-    val clientRegion: Regions = Regions.US_EAST_1
+    //val clientRegion: Regions = Regions.US_EAST_1
+    val clientRegion: Regions = conf.getString("s3.region")
 
     val s3Client = AmazonS3ClientBuilder
       .standard()
@@ -75,6 +76,7 @@ class LogFileIngestor extends AkkaStreamlet {
       //        val format = new java.text.SimpleDateFormat("yyyy-mm-dd HH:m:ss.S")
       //        val ts = format.parse(date+ ' ' + time).getTime()
       val ts = 1489997145000L
+      //val ts = conf.getInt("kafka.time")
       val gson   = new Gson
       //        val jsonLogMessage: JsonLogMessage =
       //        log.info("jsonLogMessage: {}", jsonLogMessage)
