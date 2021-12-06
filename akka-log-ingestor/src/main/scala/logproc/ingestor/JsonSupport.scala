@@ -1,10 +1,10 @@
 package logproc.ingestor
 
+import com.typesafe.config.ConfigFactory
 import spray.json._
 
 import java.util.UUID
 import scala.util.Try
-
 import logproc.data._
 // JsonSupport for different AVROs used
 trait UUIDJsonSupport extends DefaultJsonProtocol {
@@ -12,8 +12,11 @@ trait UUIDJsonSupport extends DefaultJsonProtocol {
     def write(uuid: UUID) = JsString(uuid.toString)
 
     def read(json: JsValue): UUID = json match {
-      case JsString(uuid) => Try(UUID.fromString(uuid)).getOrElse(deserializationError(s"Expected valid UUID but got '$uuid'."))
-      case other          => deserializationError(s"Expected UUID as JsString, but got: $other")
+      case JsString(uuid) => {
+        val conf   = ConfigFactory.load("application.conf")
+        Try(UUID.fromString(uuid)).getOrElse(deserializationError(conf.getString("jsonSupport.deSerialisationError")))
+      }
+      case other          => deserializationError(conf.getString("jsonSupport.deSerialisationError"))
     }
   }
 }

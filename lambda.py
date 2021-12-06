@@ -18,7 +18,6 @@ def lambda_handler(event, context):
         })
         requests.post(url=API,data=data)
         print("S3 object is "+key)
-        #print("CONTENT TYPE: " + response['ContentType'])
         return json.dumps({
             "message" : "sucesss"
         })
