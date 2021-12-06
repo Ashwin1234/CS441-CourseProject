@@ -22,13 +22,19 @@ class EmailProc extends AkkaStreamlet{
   val conf   = ConfigFactory.load("application.conf")
   val in = AvroInlet[LogStats](conf.getString("email.inlet-name"))
 
+  /* Function to send mail to the client
+
+  @param stat: Log stats object - If Error, Has no of errors, Application ID, Time start and time end
+  */
   def sendEmail(stat: LogStats) = {
+    //If error exists
     if(stat.flagErrors == 1){
+      //Setting the email content
       val from = conf.getString("email.emailId")
       val to = conf.getString("email.emailId")
       val HTMLBODY = conf.getString("email.bodyTemplate").format(stat.numErrors, stat.numLogs, stat.app, stat.windowstart, stat.windowend)
       val SUBJECT = conf.getString("email.subject")
-
+      // Creating Email client
       val client = AmazonSimpleEmailServiceClientBuilder
         .standard()
         .withRegion(Regions.US_EAST_1).build()
@@ -41,7 +47,7 @@ class EmailProc extends AkkaStreamlet{
           withSubject(new Content()
           .withCharset(conf.getString("email.charset")).withData(SUBJECT)))
         .withSource(from)
-
+      //Sending request
       client.sendEmail(request)
       stat
     }
