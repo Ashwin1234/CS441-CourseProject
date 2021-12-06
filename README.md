@@ -68,8 +68,13 @@ If using AWS ECR, provide those credentials instead.
 + spark-aggregator - Contains the spark aggregation program to perform some data aggregation tasks.
 + EmailProc.scala - Contains the code to dispatch email using AWS SES.
 
+Complete flow along with loggers can be seen here [include](File:flow.md)
 
-First we need to understand certain concepts
+### About Cloudflow Applications
+
+Cloudflow provides an easy way to package and deploy structured streaming applications for streaming pipelines. Cloudflow uses the blueprint to orchestrate the streaming pipeline which are physically implemented as Kafka streams that are made typesafe during compile time using on Avro Schemas.
+
+Some concepts on cloudflow.
 
 ## [Cloudflow Streamlets](https://developer.lightbend.com/docs/cloudflow/current/streamlets.html)
 Streamlets are cannonical class names which have inlets and outlets. A Streamlet can have more than one inlet and outlet.
